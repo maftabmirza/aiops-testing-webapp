@@ -162,6 +162,164 @@
             </div>
         </div>
     </div>
+
+    <!-- Create Test Case Modal -->
+    <div x-show="showCreateModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-70 overflow-y-auto h-full w-full z-50" @click.self="showCreateModal = false">
+        <div class="relative top-10 mx-auto p-6 border w-full max-w-2xl shadow-lg rounded-md bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 mb-10">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Create New Test Case</h3>
+                <button @click="showCreateModal = false" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <form @submit.prevent="createTestCase()" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Test ID -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Test ID *</label>
+                        <input
+                            type="text"
+                            x-model="newTestCase.test_id"
+                            required
+                            placeholder="e.g., TEST-001"
+                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        >
+                    </div>
+
+                    <!-- Suite -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Test Suite *</label>
+                        <select
+                            x-model="newTestCase.suite_id"
+                            required
+                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        >
+                            <option value="">Select a suite...</option>
+                            <template x-for="suite in suites" :key="suite.id">
+                                <option :value="suite.id" x-text="`${suite.name} (${suite.category})`"></option>
+                            </template>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Name -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Test Name *</label>
+                    <input
+                        type="text"
+                        x-model="newTestCase.name"
+                        required
+                        placeholder="Descriptive test name"
+                        class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    >
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                    <textarea
+                        x-model="newTestCase.description"
+                        rows="3"
+                        placeholder="What does this test do?"
+                        class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    ></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Test File Path -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Test File Path *</label>
+                        <input
+                            type="text"
+                            x-model="newTestCase.test_file_path"
+                            required
+                            placeholder="e2e/linux/test_file.py"
+                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        >
+                    </div>
+
+                    <!-- Test Function -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Test Function *</label>
+                        <input
+                            type="text"
+                            x-model="newTestCase.test_function"
+                            required
+                            placeholder="test_function_name"
+                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        >
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Priority -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Priority</label>
+                        <select
+                            x-model="newTestCase.priority"
+                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        >
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                            <option value="critical">Critical</option>
+                        </select>
+                    </div>
+
+                    <!-- Timeout -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Timeout (seconds)</label>
+                        <input
+                            type="number"
+                            x-model="newTestCase.timeout_seconds"
+                            min="1"
+                            max="3600"
+                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        >
+                    </div>
+
+                    <!-- Enabled -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                        <select
+                            x-model="newTestCase.enabled"
+                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        >
+                            <option :value="true">Enabled</option>
+                            <option :value="false">Disabled</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                <div x-show="createError" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+                    <p class="text-sm text-red-800 dark:text-red-200" x-text="createError"></p>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <button
+                        type="button"
+                        @click="showCreateModal = false"
+                        class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white text-sm font-medium rounded-md hover:bg-gray-400 dark:hover:bg-gray-500"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        :disabled="creatingTest"
+                        class="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm font-medium rounded-md hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <span x-show="!creatingTest">Create Test Case</span>
+                        <span x-show="creatingTest">Creating...</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -181,6 +339,19 @@ function testCasesData() {
             search: ''
         },
         showCreateModal: false,
+        creatingTest: false,
+        createError: '',
+        newTestCase: {
+            test_id: '',
+            suite_id: '',
+            name: '',
+            description: '',
+            test_file_path: '',
+            test_function: '',
+            priority: 'medium',
+            timeout_seconds: 300,
+            enabled: true
+        },
 
         async init() {
             await this.loadSuites();
@@ -267,6 +438,50 @@ function testCasesData() {
 
             if (response.ok) {
                 await this.loadTestCases();
+            }
+        },
+
+        async createTestCase() {
+            this.creatingTest = true;
+            this.createError = '';
+
+            try {
+                // Convert suite_id to integer
+                const payload = {
+                    ...this.newTestCase,
+                    suite_id: parseInt(this.newTestCase.suite_id)
+                };
+
+                const response = await fetch('/test-cases/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    // Reset form
+                    this.newTestCase = {
+                        test_id: '',
+                        suite_id: '',
+                        name: '',
+                        description: '',
+                        test_file_path: '',
+                        test_function: '',
+                        priority: 'medium',
+                        timeout_seconds: 300,
+                        enabled: true
+                    };
+                    this.showCreateModal = false;
+                    // Reload test cases
+                    await this.loadTestCases();
+                } else {
+                    const error = await response.json();
+                    this.createError = error.detail || 'Failed to create test case';
+                }
+            } catch (error) {
+                this.createError = 'Failed to create test case: ' + error.message;
+            } finally {
+                this.creatingTest = false;
             }
         },
 
