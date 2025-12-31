@@ -12,9 +12,10 @@ from datetime import datetime
 import os
 
 from app.database import get_db
-from app.models import TestRun, TestResult, TestCase, TestSuite
+from app.models import TestRun, TestResult, TestCase, TestSuite, User
 from app.models.test_run import TestRunStatus, TestRunTrigger
 from app.services.executor import TestExecutor
+from app.api.auth import get_current_user
 
 router = APIRouter(prefix="/test-runs", tags=["test_runs"])
 
@@ -59,12 +60,16 @@ class TestRunResponse(BaseModel):
 @router.get("/", response_class=HTMLResponse)
 async def test_runs_page(
     request: Request,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
     Render the test runs HTML page
     """
-    return templates.TemplateResponse("test_runs.html", {"request": request})
+    return templates.TemplateResponse("test_runs.html", {
+        "request": request,
+        "current_user": current_user
+    })
 
 
 @router.get("/list")
@@ -175,14 +180,15 @@ async def get_test_run(
 async def test_run_details_page(
     run_id: int,
     request: Request,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
     Render the test run details HTML page
     """
     return templates.TemplateResponse(
         "test_run_details.html",
-        {"request": request, "run_id": run_id}
+        {"request": request, "run_id": run_id, "current_user": current_user}
     )
 
 

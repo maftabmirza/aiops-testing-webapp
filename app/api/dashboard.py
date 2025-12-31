@@ -11,9 +11,10 @@ from typing import Dict, List, Any
 import os
 
 from app.database import get_db
-from app.models import TestRun, TestResult, TestCase, TestSuite
+from app.models import TestRun, TestResult, TestCase, TestSuite, User
 from app.models.test_run import TestRunStatus
 from app.models.test_result import TestResultStatus
+from app.api.auth import get_current_user
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
@@ -25,12 +26,16 @@ templates = Jinja2Templates(directory=templates_dir)
 @router.get("/", response_class=HTMLResponse)
 async def dashboard_page(
     request: Request,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
     Render the dashboard HTML page
     """
-    return templates.TemplateResponse("dashboard.html", {"request": request})
+    return templates.TemplateResponse("dashboard.html", {
+        "request": request,
+        "current_user": current_user
+    })
 
 
 @router.get("/stats")

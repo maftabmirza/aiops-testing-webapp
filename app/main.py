@@ -10,7 +10,7 @@ import os
 
 from app.config import settings
 from app.database import init_db
-from app.api import dashboard, test_cases, test_runs, webhook
+from app.api import dashboard, test_cases, test_runs, webhook, auth
 
 
 @asynccontextmanager
@@ -58,6 +58,7 @@ if os.path.exists(static_dir):
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # Include routers
+app.include_router(auth.router)
 app.include_router(dashboard.router)
 app.include_router(test_cases.router)
 app.include_router(test_runs.router)
@@ -67,9 +68,9 @@ app.include_router(webhook.router)
 @app.get("/")
 async def root():
     """
-    Root endpoint - redirect to dashboard
+    Root endpoint - redirect to login page
     """
-    return RedirectResponse(url="/dashboard")
+    return RedirectResponse(url="/auth/login")
 
 
 @app.get("/health")

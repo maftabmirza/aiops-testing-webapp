@@ -12,8 +12,9 @@ from datetime import datetime
 import os
 
 from app.database import get_db
-from app.models import TestCase, TestSuite
+from app.models import TestCase, TestSuite, User
 from app.models.test_case import TestPriority
+from app.api.auth import get_current_user
 
 router = APIRouter(prefix="/test-cases", tags=["test_cases"])
 
@@ -75,12 +76,16 @@ class TestCaseResponse(BaseModel):
 @router.get("/", response_class=HTMLResponse)
 async def test_cases_page(
     request: Request,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
     Render the test cases HTML page
     """
-    return templates.TemplateResponse("test_cases.html", {"request": request})
+    return templates.TemplateResponse("test_cases.html", {
+        "request": request,
+        "current_user": current_user
+    })
 
 
 @router.get("/list")
