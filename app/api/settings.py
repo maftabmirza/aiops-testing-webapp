@@ -8,11 +8,21 @@ from typing import Dict, Any
 from pydantic import BaseModel, Field
 import httpx
 
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from fastapi import Request
+import os
+
 from app.database import get_db
 from app.models import Settings, User
 from app.api.auth import get_current_user
 
 router = APIRouter(prefix="/api/settings", tags=["settings"])
+web_router = APIRouter(prefix="/settings", tags=["settings_web"])
+
+# Get the templates directory
+templates_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "templates")
+templates = Jinja2Templates(directory=templates_dir)
 
 
 # Pydantic Schemas
@@ -34,6 +44,20 @@ class ConnectionTestRequest(BaseModel):
     """Schema for testing connection"""
     url: str
     token: str | None = None
+
+
+@web_router.get("", response_class=HTMLResponse)
+async def settings_page(
+    request: Request,
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Render the settings HTML page
+    """
+    return templates.TemplateResponse("settings.html", {
+        "request": request,
+        "current_user": current_user
+    })
 
 
 @router.get("")

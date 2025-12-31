@@ -65,6 +65,7 @@ app.include_router(test_runs.router)
 app.include_router(test_suites.router)
 app.include_router(webhook.router)
 app.include_router(settings_api.router)
+app.include_router(settings_api.web_router)
 
 
 @app.get("/")
