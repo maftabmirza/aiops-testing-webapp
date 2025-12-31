@@ -7,23 +7,44 @@
     <!-- Page Header -->
     <div class="mb-6 flex justify-between items-center">
         <div>
-            <h2 class="text-2xl font-bold text-gray-900">Test Cases</h2>
-            <p class="mt-1 text-sm text-gray-600">Manage and organize test cases</p>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Test Cases</h2>
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage and organize test cases</p>
         </div>
-        <button @click="showCreateModal = true" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
-            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            New Test Case
-        </button>
+        <div class="flex space-x-3">
+            <button
+                x-show="selectedTests.length > 0"
+                @click="runSelectedTests()"
+                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+            >
+                <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                Run Selected (<span x-text="selectedTests.length"></span>)
+            </button>
+            <button @click="showCreateModal = true" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+                <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                New Test Case
+            </button>
+        </div>
     </div>
 
-    <!-- Filters -->
-    <div class="bg-white shadow rounded-lg p-4 mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <!-- Filters and Actions -->
+    <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 mb-6 border border-gray-200 dark:border-gray-700">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700">Category</label>
-                <select x-model="filters.category" @change="loadTestCases()" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Suite</label>
+                <select x-model="filters.suite_id" @change="loadTestCases()" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">All Suites</option>
+                    <template x-for="suite in suites" :key="suite.id">
+                        <option :value="suite.id" x-text="suite.name"></option>
+                    </template>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                <select x-model="filters.category" @change="loadTestCases()" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     <option value="">All Categories</option>
                     <option value="linux">Linux</option>
                     <option value="safety">Safety</option>
@@ -32,8 +53,8 @@
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Priority</label>
-                <select x-model="filters.priority" @change="loadTestCases()" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Priority</label>
+                <select x-model="filters.priority" @change="loadTestCases()" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     <option value="">All Priorities</option>
                     <option value="critical">Critical</option>
                     <option value="high">High</option>
@@ -42,67 +63,101 @@
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Status</label>
-                <select x-model="filters.enabled" @change="loadTestCases()" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                <select x-model="filters.enabled" @change="loadTestCases()" class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     <option value="">All</option>
                     <option value="true">Enabled</option>
                     <option value="false">Disabled</option>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Search</label>
-                <input type="text" x-model="filters.search" @input="loadTestCases()" placeholder="Search by name or ID..." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
+                <input type="text" x-model="filters.search" @input="loadTestCases()" placeholder="Search..." class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500">
             </div>
         </div>
     </div>
 
     <!-- Test Cases Table -->
-    <div class="bg-white shadow rounded-lg overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+    <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-900">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Test ID</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timeout</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th class="px-6 py-3 text-left">
+                        <input
+                            type="checkbox"
+                            @change="toggleSelectAll()"
+                            :checked="selectedTests.length === testCases.length && testCases.length > 0"
+                            class="rounded border-gray-300 dark:border-gray-600 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        >
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Test ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Suite</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Priority</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Timeout</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 <template x-for="testCase in testCases" :key="testCase.id">
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="testCase.test_id"></td>
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900" x-text="testCase.name"></div>
-                            <div class="text-sm text-gray-500" x-text="testCase.description"></div>
+                            <input
+                                type="checkbox"
+                                :value="testCase.id"
+                                x-model="selectedTests"
+                                class="rounded border-gray-300 dark:border-gray-600 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            >
                         </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white" x-text="testCase.test_id"></td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900 dark:text-white" x-text="testCase.name"></div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400" x-text="testCase.description"></div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400" x-text="testCase.suite_name || 'N/A'"></td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="status-badge" :class="'bg-' + getPriorityColor(testCase.priority)" x-text="testCase.priority"></span>
+                            <span class="px-2 py-1 text-xs font-medium rounded-full"
+                                :class="{
+                                    'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200': testCase.priority === 'critical',
+                                    'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200': testCase.priority === 'high',
+                                    'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200': testCase.priority === 'medium',
+                                    'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200': testCase.priority === 'low'
+                                }"
+                                x-text="testCase.priority">
+                            </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="testCase.timeout_seconds + 's'"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400" x-text="testCase.timeout_seconds + 's'"></td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span :class="testCase.enabled ? 'text-green-600' : 'text-red-600'" x-text="testCase.enabled ? 'Enabled' : 'Disabled'"></span>
+                            <span
+                                :class="testCase.enabled ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"
+                                x-text="testCase.enabled ? 'Enabled' : 'Disabled'"
+                            ></span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button @click="runTest(testCase.id)" class="text-blue-600 hover:text-blue-900 mr-3">Run</button>
-                            <button @click="editTest(testCase)" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</button>
-                            <button @click="deleteTest(testCase.id)" class="text-red-600 hover:text-red-900">Delete</button>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3">
+                            <button @click="runTest(testCase.id)" class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">Run</button>
+                            <button @click="editTest(testCase)" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">Edit</button>
+                            <button @click="deleteTest(testCase.id)" class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300">Delete</button>
                         </td>
                     </tr>
                 </template>
+                <tr x-show="testCases.length === 0">
+                    <td colspan="8" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                        No test cases found. Create your first test case to get started.
+                    </td>
+                </tr>
             </tbody>
         </table>
 
         <!-- Pagination -->
-        <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+        <div class="bg-gray-50 dark:bg-gray-900 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6">
             <div class="flex items-center justify-between">
-                <div class="text-sm text-gray-700">
-                    Showing <span x-text="testCases.length"></span> of <span x-text="totalTests"></span> test cases
+                <div class="text-sm text-gray-700 dark:text-gray-300">
+                    Showing <span class="font-medium" x-text="testCases.length"></span> of <span class="font-medium" x-text="totalTests"></span> test cases
                 </div>
                 <div class="flex space-x-2">
-                    <button @click="previousPage()" :disabled="currentPage === 0" class="px-3 py-1 border rounded text-sm disabled:opacity-50">Previous</button>
-                    <button @click="nextPage()" :disabled="(currentPage + 1) * pageSize >= totalTests" class="px-3 py-1 border rounded text-sm disabled:opacity-50">Next</button>
+                    <button @click="previousPage()" :disabled="currentPage === 0" class="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Previous</button>
+                    <button @click="nextPage()" :disabled="(currentPage + 1) * pageSize >= totalTests" class="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Next</button>
                 </div>
             </div>
         </div>
@@ -113,10 +168,13 @@
 function testCasesData() {
     return {
         testCases: [],
+        suites: [],
         totalTests: 0,
         currentPage: 0,
         pageSize: 20,
+        selectedTests: [],
         filters: {
+            suite_id: '',
             category: '',
             priority: '',
             enabled: '',
@@ -125,21 +183,35 @@ function testCasesData() {
         showCreateModal: false,
 
         async init() {
+            await this.loadSuites();
             await this.loadTestCases();
+        },
+
+        async loadSuites() {
+            try {
+                const response = await fetch('/test-suites/list');
+                if (response.ok) {
+                    this.suites = await response.json();
+                }
+            } catch (error) {
+                console.error('Failed to load suites:', error);
+            }
         },
 
         async loadTestCases() {
             const params = new URLSearchParams();
+            if (this.filters.suite_id) params.append('suite_id', this.filters.suite_id);
             if (this.filters.category) params.append('category', this.filters.category);
             if (this.filters.priority) params.append('priority', this.filters.priority);
             if (this.filters.enabled) params.append('enabled', this.filters.enabled);
+            if (this.filters.search) params.append('search', this.filters.search);
             params.append('skip', this.currentPage * this.pageSize);
             params.append('limit', this.pageSize);
 
             const response = await fetch('/test-cases/list?' + params.toString());
             const data = await response.json();
-            this.testCases = data.items;
-            this.totalTests = data.total;
+            this.testCases = data.items || [];
+            this.totalTests = data.total || 0;
         },
 
         async runTest(testCaseId) {
@@ -155,8 +227,34 @@ function testCasesData() {
 
             if (response.ok) {
                 const result = await response.json();
-                alert('Test run created: #' + result.id);
                 window.location.href = '/test-runs/' + result.id + '/page';
+            } else {
+                alert('Failed to start test run');
+            }
+        },
+
+        async runSelectedTests() {
+            if (this.selectedTests.length === 0) {
+                alert('Please select at least one test case');
+                return;
+            }
+
+            const response = await fetch('/test-runs/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    test_case_ids: this.selectedTests,
+                    trigger: 'manual',
+                    triggered_by: 'user'
+                })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                this.selectedTests = [];
+                window.location.href = '/test-runs/' + result.id + '/page';
+            } else {
+                alert('Failed to start test run');
             }
         },
 
@@ -176,14 +274,12 @@ function testCasesData() {
             alert('Edit functionality coming soon!');
         },
 
-        getPriorityColor(priority) {
-            const colors = {
-                critical: 'red-100',
-                high: 'orange-100',
-                medium: 'yellow-100',
-                low: 'gray-100'
-            };
-            return colors[priority] || 'gray-100';
+        toggleSelectAll() {
+            if (this.selectedTests.length === this.testCases.length) {
+                this.selectedTests = [];
+            } else {
+                this.selectedTests = this.testCases.map(tc => tc.id);
+            }
         },
 
         nextPage() {
