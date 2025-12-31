@@ -73,7 +73,7 @@ async def receive_pytest_results(
         test_run.error_message = payload.error_message
 
     if payload.metadata:
-        test_run.metadata = payload.metadata
+        test_run.run_metadata = payload.metadata
 
     # Process individual test results
     for result_item in payload.results:

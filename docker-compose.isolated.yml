@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  aiops-testmgr-db:
+    image: postgres:16
+    container_name: aiops-testmgr-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: aiops_test_manager_isolated
+      POSTGRES_USER: aiops_testmgr
+      POSTGRES_PASSWORD: aiops_testmgr_password
+    volumes:
+      - aiops_testmgr_pgdata:/var/lib/postgresql/data
+    ports:
+      - "55433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aiops_testmgr -d aiops_test_manager_isolated"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - aiops-testmgr-net
+
+  aiops-testmgr-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.isolated
+    container_name: aiops-testmgr-app
+    restart: unless-stopped
+    depends_on:
+      aiops-testmgr-db:
+        condition: service_healthy
+    environment:
+      POSTGRES_HOST: aiops-testmgr-db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: aiops_test_manager_isolated
+      POSTGRES_USER: aiops_testmgr
+      POSTGRES_PASSWORD: aiops_testmgr_password
+
+      # Reach existing local service via host port mapping
+      REMEDIATION_ENGINE_URL: http://host.docker.internal:8080
+
+      DEBUG: "false"
+    ports:
+      - "18001:8001"
+    networks:
+      - aiops-testmgr-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  aiops_testmgr_pgdata:
+
+networks:
+  aiops-testmgr-net:
+    driver: bridge

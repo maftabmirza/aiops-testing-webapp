@@ -33,7 +33,7 @@ class TestResult(Base):
     stderr = Column(Text, nullable=True)
     screenshots = Column(JSON, nullable=True)  # Array of screenshot paths
     logs = Column(JSON, nullable=True)  # Structured logs
-    metadata = Column(JSON, nullable=True)  # Additional data
+    result_metadata = Column("metadata", JSON, nullable=True)  # Additional data
     executed_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     # Relationships

@@ -153,7 +153,7 @@ async def get_test_run(
         "failed_tests": test_run.failed_tests,
         "skipped_tests": test_run.skipped_tests,
         "error_message": test_run.error_message,
-        "metadata": test_run.metadata,
+        "metadata": test_run.run_metadata,
         "started_at": test_run.started_at.isoformat() if test_run.started_at else None,
         "completed_at": test_run.completed_at.isoformat() if test_run.completed_at else None,
         "created_at": test_run.created_at.isoformat(),
@@ -209,7 +209,7 @@ async def create_test_run(
         trigger=test_run_data.trigger,
         triggered_by=test_run_data.triggered_by,
         environment=test_run_data.environment,
-        metadata=test_run_data.metadata
+        run_metadata=test_run_data.metadata
     )
     db.add(test_run)
     await db.commit()

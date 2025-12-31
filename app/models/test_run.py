@@ -44,7 +44,7 @@ class TestRun(Base):
     failed_tests = Column(Integer, default=0, nullable=False)
     skipped_tests = Column(Integer, default=0, nullable=False)
     error_message = Column(Text, nullable=True)
-    metadata = Column(JSON, nullable=True)  # Additional metadata
+    run_metadata = Column("metadata", JSON, nullable=True)  # Additional metadata
     started_at = Column(DateTime(timezone=True), nullable=True)
     completed_at = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False, index=True)
