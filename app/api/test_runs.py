@@ -232,6 +232,49 @@ async def create_test_run(
     return TestRunResponse.model_validate(test_run)
 
 
+@router.post("/suite/{suite_id}")
+async def create_suite_test_run(
+    suite_id: int,
+    background_tasks: BackgroundTasks,
+    trigger: TestRunTrigger = TestRunTrigger.MANUAL,
+    triggered_by: Optional[str] = None,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+) -> TestRunResponse:
+    """
+    Create and execute a test run for all tests in a suite
+    """
+    # Verify suite exists
+    suite_query = select(TestSuite).where(TestSuite.id == suite_id)
+    suite_result = await db.execute(suite_query)
+    suite = suite_result.scalar_one_or_none()
+
+    if not suite:
+        raise HTTPException(status_code=404, detail="Test suite not found")
+
+    # Create test run record
+    test_run = TestRun(
+        suite_id=suite_id,
+        status=TestRunStatus.PENDING,
+        trigger=trigger,
+        triggered_by=triggered_by or current_user.username,
+        run_metadata={"suite_name": suite.name, "category": suite.category}
+    )
+    db.add(test_run)
+    await db.commit()
+    await db.refresh(test_run)
+
+    # Execute tests in background
+    background_tasks.add_task(
+        execute_test_run,
+        test_run.id,
+        suite_id,
+        None
+    )
+
+    return TestRunResponse.model_validate(test_run)
+
+
 @router.post("/{run_id}/cancel")
 async def cancel_test_run(
     run_id: int,
