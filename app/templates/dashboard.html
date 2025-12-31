@@ -175,6 +175,12 @@ function dashboardData() {
             const data = await response.json();
 
             const ctx = document.getElementById('trendsChart').getContext('2d');
+
+            // Destroy existing chart if it exists
+            if (this.trendsChart) {
+                this.trendsChart.destroy();
+            }
+
             this.trendsChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -206,6 +212,12 @@ function dashboardData() {
             const data = await response.json();
 
             const ctx = document.getElementById('categoryChart').getContext('2d');
+
+            // Destroy existing chart if it exists
+            if (this.categoryChart) {
+                this.categoryChart.destroy();
+            }
+
             this.categoryChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {

@@ -10,7 +10,7 @@ import os
 
 from app.config import settings
 from app.database import init_db
-from app.api import dashboard, test_cases, test_runs, test_suites, webhook, auth
+from app.api import dashboard, test_cases, test_runs, test_suites, webhook, auth, settings as settings_api
 
 
 @asynccontextmanager
@@ -64,6 +64,7 @@ app.include_router(test_cases.router)
 app.include_router(test_runs.router)
 app.include_router(test_suites.router)
 app.include_router(webhook.router)
+app.include_router(settings_api.router)
 
 
 @app.get("/")

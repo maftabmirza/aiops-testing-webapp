@@ -8,6 +8,7 @@ from app.models.test_run import TestRun
 from app.models.test_result import TestResult, TestStepResult
 from app.models.test_schedule import TestSchedule
 from app.models.test_alert_link import TestAlertLink
+from app.models.settings import Settings
 
 __all__ = [
     "User",
@@ -18,4 +19,5 @@ __all__ = [
     "TestStepResult",
     "TestSchedule",
     "TestAlertLink",
+    "Settings",
 ]

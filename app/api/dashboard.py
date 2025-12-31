@@ -38,6 +38,20 @@ async def dashboard_page(
     })
 
 
+@router.get("/settings", response_class=HTMLResponse)
+async def settings_page(
+    request: Request,
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Render the settings HTML page
+    """
+    return templates.TemplateResponse("settings.html", {
+        "request": request,
+        "current_user": current_user
+    })
+
+
 @router.get("/stats")
 async def get_dashboard_stats(
     db: AsyncSession = Depends(get_db)
